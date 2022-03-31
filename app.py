@@ -24,8 +24,8 @@ new_model = tf.keras.models.load_model('best_model_full_vac_0.66')
 IMG_SIZE = (224, 224)
 from tensorflow.keras.preprocessing import image
 
-
-def get_prediction_pheno(data={"SITE_ID":"ABIDEII-KKI_1","SUB_ID":29554,"AGE_AT_SCAN":34.564,"SEX":1,"HANDEDNESS_CATEGORY":1,"HANDEDNESS_SCORES":0,"FIQ":100,"VIQ":0,"PIQ":0,"FIQ_TEST_TYPE":"WISC-IV","SRS_EDITION":1,"SRS_VERSION":1,"SRS_INFORMANT":1,"SRS_TOTAL_RAW":81,"SRS_AWARENESS_RAW":10.5,"SRS_COGNITION_RAW":15.5,"SRS_COMMUNICATION_RAW":27.5,"SRS_MOTIVATION_RAW":14.5,"SRS_MANNERISMS_RAW":18,"SRS_TOTAL_T":73.5,"SRS_AWARENESS_T":65,"SRS_COGNITION_T":71,"SRS_COMMUNICATION_T":73,"SRS_MOTIVATION_T":71.5,"SRS_MANNERISMS_T":89,"CURRENT_MED_STATUS":0}):
+#
+def get_prediction_pheno(data):
   url = 'https://askai.aiclub.world/c22776b6-21e7-4a55-bbf4-444e6fa6c7b5'
   print(data)
   r = requests.post(url, data=json.dumps(data))
@@ -64,13 +64,22 @@ def processImageFile(f):
 def combineResults(r1,c1,c2,r2,i1,i2):
   s=f'Combined results: {r1},{c1},{c2},{r2},{i1},{i2}'
   print("Combined results: ",r1,c1,c2,r2,i1,i2)
-  st.title(s)
+  if(r1==1 and r2==1):
+    resp="Both AIs agree Conclusion 1"
+  elif(r1==2 and r2==2):
+    resp="Both AIs agree Conclusion 2"
+  else: 
+    if(c1+i1>c2+i2):
+      resp="Disagreement, but majority favors 1"
+    else:
+      resp="Disagreement, but majority favors 2"
+  st.title(resp)
 #
 def uploadFiles():
   st.title("Patient information")
-  uploadedCsvFile=st.file_uploader("Choose patient record")
-  uploadedImageFile=st.file_uploader("Choose MRI file")
-  if st.button("Run AI"):
+  uploadedCsvFile=st.sidebar.file_uploader("Choose patient record")
+  uploadedImageFile=st.sidebar.file_uploader("Choose MRI file")
+  if st.sidebar.button("Run AI"):
     if uploadedCsvFile is not None:
       df = pd.read_csv(uploadedCsvFile)
       records= df.to_dict(orient='records')
