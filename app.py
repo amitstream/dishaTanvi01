@@ -36,10 +36,12 @@ print("At Step 1 of program",datetime.datetime.now())
 IMG_SIZE = (224, 224)
 from tensorflow.keras.preprocessing import image
 print("At Step 2 of program",datetime.datetime.now())
-placeholder=st.empty()
+topTitle=st.empty()
+imageShow=st.empty()
+fileShow=st.empty()
 #
 def get_prediction_pheno(data):
-  placeholder.title("Processing user data")
+  topTitle.title("Processing user data")
   print("At Step 1 of get_prediction_pheno",datetime.datetime.now())
   url = 'https://askai.aiclub.world/c22776b6-21e7-4a55-bbf4-444e6fa6c7b5'
   print(data)
@@ -65,8 +67,7 @@ def noOp():
 #
 def processImageFile(f):
   print("At Step 1 of process_image_file",datetime.datetime.now())
-  placeholder.title("Processing MRI image")
-  st.image(f)
+  topTitle.title("Processing MRI image")
   if "model_loaded" not in st.session_state:
     print("Loading session state at first invocation of processImageFile",datetime.datetime.now())
     #new_model=load_my_model('best_model_full_vac_0.66')
@@ -112,7 +113,7 @@ def combineResults(r1,c1,c2,r2,i1,i2):
       resp="Disagreement, but majority favors 1"
     else:
       resp="Disagreement, but majority favors 2"
-  placeholder.title(resp)
+  topTitle.title(resp)
   print("At Step 7 of combine_results",datetime.datetime.now())
 #
 def runAI():
@@ -132,15 +133,19 @@ def runAI():
 def uploadFiles():
   global uploadedCsvFile,uploadedImageFile
   print("At Step 1 of upload_files",datetime.datetime.now())
-  placeholder.title("Waiting for patient information")
+  topTitle.title("Waiting for patient information")
   uploadedCsvFile=st.sidebar.file_uploader("Choose patient record")
   uploadedImageFile=st.sidebar.file_uploader("Choose MRI file")
   print("At Step 3 of upload_files",datetime.datetime.now())
+  if uploadedCsvFile is not None:
+    df = pd.read_csv(uploadedCsvFile)
+    records= df.to_dict(orient='records')
+    fileShow.write(records)
+  if uploadedImageFile is not None:
+    imageShow.image(uploadedImageFile)
   if st.sidebar.button("Run AI"):
     print("At Step 5 of upload_files",datetime.datetime.now())
     if uploadedCsvFile is not None:
-      df = pd.read_csv(uploadedCsvFile)
-      records= df.to_dict(orient='records')
       resp,c1,c2=get_prediction_pheno(data=records[0])
       print("Pheno resp:",resp," and confidence=",c1," and ",c2)
     print("At Step 7 of upload_files",datetime.datetime.now())
