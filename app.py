@@ -25,7 +25,7 @@ def get_prediction_pheno(data):
   url = 'https://askai.aiclub.world/c22776b6-21e7-4a55-bbf4-444e6fa6c7b5'
   r = requests.post(url, data=json.dumps(data))
   response = getattr(r,'_content').decode("utf-8")
-  print(response)
+  #print(response)
   j=json.loads(response)
   b=j["body"]
   j2=json.loads(b)
@@ -47,15 +47,10 @@ def processImageFile(f):
     new_model=st.session_state.model_loaded
   # Please replace the brackets below with the location of your image which need to predict
   img = Image.open(f)
-  print("1 IMG=",img)
   img = img.resize(IMG_SIZE, Image.ANTIALIAS)
-  print("2 IMG=",img)
   img = img.convert(mode="RGB")
-  print("3 IMG=",img)
   img_array = image.img_to_array(img)
-  print("10 IMG-array=",img_array.shape)
   img_batch = np.expand_dims(img_array, axis=0)
-  print("11 IMG-batch=",img_batch.shape)
   img_preprocessed = preprocess_input(img_batch)
   #new_model=load_my_model('best_model_full_vac_0.66')
   prediction_sample = new_model.predict(img_preprocessed)
