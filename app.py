@@ -14,8 +14,11 @@ import json
 IMG_SIZE = (224, 224)
 
 topTitle=st.empty()
-imageShow=st.empty()
-fileShow=st.empty()
+imageInputShow=st.empty()
+fileInputShow=st.empty()
+imageAIShow=st.empty()
+fileAIShow=st.empty()
+
 #
 def get_prediction_pheno(data):
   topTitle.title("Processing user data")
@@ -31,6 +34,7 @@ def get_prediction_pheno(data):
   c1=c['1']
   c2=c['2']
   print("P=",p," while C=",c, " with c1=",c1," and c2=",c2)
+  fileAIShow.title(f'Pheno {p}, {c1},{c2}')
   return p,c1,c2
 #
 def processImageFile(f):
@@ -43,9 +47,15 @@ def processImageFile(f):
     new_model=st.session_state.model_loaded
   # Please replace the brackets below with the location of your image which need to predict
   img = Image.open(f)
+  print("1 IMG=",img)
   img = img.resize(IMG_SIZE, Image.ANTIALIAS)
+  print("2 IMG=",img)
+  img = img.convert(mode="RGB")
+  print("3 IMG=",img)
   img_array = image.img_to_array(img)
+  print("10 IMG-array=",img_array.shape)
   img_batch = np.expand_dims(img_array, axis=0)
+  print("11 IMG-batch=",img_batch.shape)
   img_preprocessed = preprocess_input(img_batch)
   #new_model=load_my_model('best_model_full_vac_0.66')
   prediction_sample = new_model.predict(img_preprocessed)
@@ -57,6 +67,7 @@ def processImageFile(f):
   else:
     predicted_label = 2
   print("\nIMAGE processing:",predicted_label,score_1, score_2)
+  imageAIShow.title(f'Image: {predicted_label},{score_1},{score_2}')
   return predicted_label,score_1,score_2
 #
 def combineResults(r1,c1,c2,r2,i1,i2):
@@ -75,15 +86,15 @@ def combineResults(r1,c1,c2,r2,i1,i2):
 #
 def uploadFiles():
   global uploadedCsvFile,uploadedImageFile
-  topTitle.title("Waiting for patient information")
+  topTitle.title("Getting patient information")
   uploadedCsvFile=st.sidebar.file_uploader("Choose patient record")
   uploadedImageFile=st.sidebar.file_uploader("Choose MRI file")
   if uploadedCsvFile is not None:
     df = pd.read_csv(uploadedCsvFile)
     records= df.to_dict(orient='records')
-    fileShow.write(records)
+    fileInputShow.write(records)
   if uploadedImageFile is not None:
-    imageShow.image(uploadedImageFile)
+    imageInputShow.image(uploadedImageFile)
   if st.sidebar.button("Run AI"):
     if uploadedCsvFile is not None:
       resp,c1,c2=get_prediction_pheno(data=records[0])
