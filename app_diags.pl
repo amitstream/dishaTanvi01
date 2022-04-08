@@ -14,15 +14,18 @@ import json
 IMG_SIZE = (224, 224)
 
 topTitle=st.empty()
-imageShow=st.empty()
-fileShow=st.empty()
+imageInputShow=st.empty()
+fileInputShow=st.empty()
+imageAIShow=st.empty()
+fileAIShow=st.empty()
+
 #
 def get_prediction_pheno(data):
-  topTitle.title("Processing User Data")
+  topTitle.title("Processing user data")
   url = 'https://askai.aiclub.world/c22776b6-21e7-4a55-bbf4-444e6fa6c7b5'
   r = requests.post(url, data=json.dumps(data))
   response = getattr(r,'_content').decode("utf-8")
-  print(response)
+  #print(response)
   j=json.loads(response)
   b=j["body"]
   j2=json.loads(b)
@@ -31,6 +34,7 @@ def get_prediction_pheno(data):
   c1=c['1']
   c2=c['2']
   print("P=",p," while C=",c, " with c1=",c1," and c2=",c2)
+  fileAIShow.title(f'Pheno {p}, {c1},{c2}')
   return p,c1,c2
 #
 def processImageFile(f):
@@ -58,33 +62,34 @@ def processImageFile(f):
   else:
     predicted_label = 2
   print("\nIMAGE processing:",predicted_label,score_1, score_2)
+  imageAIShow.title(f'Image: {predicted_label},{score_1},{score_2}')
   return predicted_label,score_1,score_2
 #
 def combineResults(r1,c1,c2,r2,i1,i2):
   s=f'Combined results: {r1},{c1},{c2},{r2},{i1},{i2}'
   print("Combined results: ",r1,c1,c2,r2,i1,i2)
   if(r1==1 and r2==1):
-    resp="1: Our AI Predicts a Very High Chance of Autism"
+    resp="Both AIs agree Conclusion 1"
   elif(r1==2 and r2==2):
-    resp="2: Our AI Predicts a Very Low Chance of Autism"
+    resp="Both AIs agree Conclusion 2"
   else: 
     if(c1+i1>c2+i2):
-      resp="Our AI Predicts a Strong Possibility of Autism. Further Testing is Recommended."
+      resp="Disagreement, but majority favors 1"
     else:
-      resp="Our AI Predicts a Low Possibility of Autism. Further Testing is Recommended"
+      resp="Disagreement, but majority favors 2"
   topTitle.title(resp)
 #
 def uploadFiles():
   global uploadedCsvFile,uploadedImageFile
-  topTitle.title("Please Input Patient Information")
-  uploadedCsvFile=st.sidebar.file_uploader("Choose Patient Record")
-  uploadedImageFile=st.sidebar.file_uploader("Choose MRI File")
+  topTitle.title("Getting patient information")
+  uploadedCsvFile=st.sidebar.file_uploader("Choose patient record")
+  uploadedImageFile=st.sidebar.file_uploader("Choose MRI file")
   if uploadedCsvFile is not None:
     df = pd.read_csv(uploadedCsvFile)
     records= df.to_dict(orient='records')
-    fileShow.write(records)
+    fileInputShow.write(records)
   if uploadedImageFile is not None:
-    imageShow.image(uploadedImageFile)
+    imageInputShow.image(uploadedImageFile)
   if st.sidebar.button("Run AI"):
     if uploadedCsvFile is not None:
       resp,c1,c2=get_prediction_pheno(data=records[0])
@@ -94,3 +99,4 @@ def uploadFiles():
     combineResults(resp,c1,c2,l,s1,s2)
 # Main
 uploadFiles()
+
